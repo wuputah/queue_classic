@@ -61,6 +61,12 @@ module QC
   # as the max exponent.
   MAX_LOCK_ATTEMPTS = (ENV["QC_MAX_LOCK_ATTEMPTS"] || 5).to_i
 
+  # The logger to use for QC logging. Must implement a #log method
+  # that takes a hash of data.
+  LOGGER = ENV['QC_LOGGER'] ?
+    ENV['QC_LOGGER'].split('::').inject(Object) { |base, lookup| base.const_get(lookup) } :
+    Scrolls
+
   # Defer method calls on the QC module to the
   # default queue. This facilitates QC.enqueue()
   def self.method_missing(sym, *args, &block)
@@ -87,7 +93,7 @@ module QC
   end
 
   def self.log(data)
-    Scrolls.log({:lib => :queue_classic}.merge(data))
+    LOGGER.log({:lib => :queue_classic}.merge(data))
   end
 
 end
